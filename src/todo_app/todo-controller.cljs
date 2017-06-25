@@ -10,7 +10,7 @@
 
 
   (defn filter-todos [selected-filter]
-    ;;(print "filter-todos" @model selected-filter)
+;;     (print "filter-todos" @model selected-filter)
     (-> @model
         (assoc :context (if (nil? selected-filter) "list" "filtered"))
         (assoc-in [:selected :filter-done] selected-filter)
@@ -19,7 +19,7 @@
 
 
   (defn add-todo [todo-name]
-    ;;(print "add-name" todo-name)
+;;     (print "add-name" todo-name)
     (let [new-id (inc (count (:todos @model)))]
       (-> @model
           (assoc-in [:todos (keyword (str new-id))] {:id new-id :name todo-name :done? false})
@@ -60,6 +60,7 @@
 
 
   (defn undo []
+;;     (print "undo")
     (-> @model
         ((fn return-old-value [state]
            (:old-value state)))
@@ -74,14 +75,13 @@
   (defn toggle-todo [todo-id]
     ((edit-todo todo-id)
      (let [todo-done (get-in @model [:selected :todo :done?])]
-       ;;(print "todo-done" todo-done)
+;;        (print "todo-done" todo-done)
        (if (= todo-done true)
          (change-property :done? false)
          ;;else
          (change-property :done? true)
          ))
      (save-todo))
-    ;;(print "model" @model)
     )
 
 

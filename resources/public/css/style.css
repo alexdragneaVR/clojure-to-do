@@ -144,11 +144,6 @@ hr {
 
 
 
-
-
-
-
-
 html,
 body {
 	margin: 0;
@@ -272,6 +267,10 @@ label[for='toggle-all'] {
 	display: none;
 }
 
+.toggle-all:hover {
+  cursor: pointer;
+}
+
 .toggle-all {
 	position: absolute;
 	top: -55px;
@@ -323,6 +322,10 @@ label[for='toggle-all'] {
 
 .todo-list li.editing .view {
 	display: none;
+}
+
+.todo-list li .toggle:hover {
+  cursor: pointer;
 }
 
 .todo-list li .toggle {
@@ -379,6 +382,7 @@ label[for='toggle-all'] {
 
 .todo-list li .destroy:hover {
 	color: #af5b5e;
+  cursor: pointer;
 }
 
 .todo-list li .destroy:after {
@@ -400,9 +404,10 @@ label[for='toggle-all'] {
 .footer {
 	color: #777;
 	padding: 10px 15px;
-	height: 20px;
+	height: 25px;
 	text-align: center;
 	border-top: 1px solid #e6e6e6;
+  display: flex;
 }
 
 .footer:before {
@@ -418,6 +423,7 @@ label[for='toggle-all'] {
 	            0 9px 1px -3px rgba(0, 0, 0, 0.2),
 	            0 16px 0 -6px #f6f6f6,
 	            0 17px 2px -6px rgba(0, 0, 0, 0.2);
+  z-index: 0;
 }
 
 .todo-count {
@@ -454,6 +460,7 @@ label[for='toggle-all'] {
 .filters li a.selected,
 .filters li a:hover {
 	border-color: rgba(175, 47, 47, 0.1);
+  cursor: pointer;
 }
 
 .filters li a.selected {
@@ -494,6 +501,23 @@ html .clear-completed:active {
 
 .info a:hover {
 	text-decoration: underline;
+}
+
+.undo-redo:hover {
+  cursor: pointer;
+}
+
+.undo-redo {
+  background-image: url(../img/undo.png);
+  background-repeat: no-repeat;
+  width: 36px;
+  background-position: 3px -1px;
+  height: 25px;
+  z-index: 1;
+}
+
+.header-div {
+  display: flex;
 }
 
 /*

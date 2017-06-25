@@ -10,13 +10,16 @@
    [:div
     [:header.header
      [:h1 "todos"]
-     [:input.new-todo {:placeholder "What needs to be done?"
-                       :on-key-press (fn [e]
-                                       (if (= 13 (.-charCode e))
-                                         (do
-                                           (controller/add-todo (-> e .-target .-value))
-                                           (set! (-> e .-target .-value) "")
-                                           )))}]
+     [:div.header-div
+      [:input.new-todo {:placeholder "What needs to be done?"
+                        :on-key-press (fn [e]
+                                        (if (= 13 (.-charCode e))
+                                          (do
+                                            (controller/add-todo (-> e .-target .-value))
+                                            (set! (-> e .-target .-value) "")
+                                            )))}
+       ]
+      ]
      ]
     [:section.main
      [:input.toggle-all {:type "checkbox"
@@ -25,7 +28,10 @@
       (let [todos (if (-> state :selected :filter-done nil?)
                     (-> state :todos vals)
                     ;;else
-                    (filter (fn [todo] (= (get-in state [:selected :filter-done]) (:done? todo))) (-> state :todos vals))
+                    (filter (fn [todo]
+                              (= (get-in state [:selected :filter-done]) (:done? todo))
+                              )
+                            (-> state :todos vals))
                     )
             ]
         (for [todo todos]
@@ -43,11 +49,15 @@
              (:name todo)]
             [:button.destroy {:on-click #(controller/delete-todo (:id todo))}]
             ]
-           [:input.edit {:value (:name todo)}]]))
+          ]))
       ]
      ]
     [:footer.footer
-     [:span.todo-count ]
+     [:div
+      {
+        :class "todo-count undo-redo"
+        :on-click controller/undo
+        }]
      [:ul.filters
       [:li [:a {:on-click #(controller/filter-todos nil)} "All"]]
       [:span ]
@@ -56,5 +66,4 @@
       [:li [:a {:on-click #(controller/filter-todos true)} "Completed"]]
       [:span ]
       ]
-
      ]]])
