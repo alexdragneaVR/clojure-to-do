@@ -463,6 +463,11 @@ label[for='toggle-all'] {
   cursor: pointer;
 }
 
+.filters li a:focus {
+  border-color: rgba(175, 47, 47, 0.1);
+  cursor: pointer;
+}
+
 .filters li a.selected {
 	border-color: rgba(175, 47, 47, 0.2);
 }

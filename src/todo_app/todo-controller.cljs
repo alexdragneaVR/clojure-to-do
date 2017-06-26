@@ -3,6 +3,8 @@
     [todo-app.todo-model :as m :refer [model]]
     ))
 
+  (def select-all-var true)
+
   ;;model swap
   (defn swapm! [new-value model-atom]
     (swap! model-atom (fn [x] (assoc new-value :old-value @model-atom)))
@@ -86,11 +88,17 @@
 
 
   (defn select-all []
-    (let [done (-> @model :todos vals first :done? not)]
+    (let [done select-all-var]
+      (print "done" done "select-all-var" select-all-var)
+      (if (= select-all-var true)
+        (set! select-all-var false)
+        ;;else
+        (set! select-all-var true))
       (-> @model
           (update :todos #(into {} (map (fn [[k v]] [k (assoc v :done? done)]) %)))
           (swapm! model))
-      ))
+      )
+    )
 
 
 
