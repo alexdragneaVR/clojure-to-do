@@ -1,104 +1,81 @@
 (ns todo-app.todo-controller
   (:require
-    [todo-app.todo-model :as m :refer [model]]
-    ))
+    [todo-app.todo-model :as m :refer [model]]))
 
-  (def select-all-var true)
 
   ;;model swap
-  (defn swapm! [new-value model-atom]
-    (swap! model-atom (fn [x] (assoc new-value :old-value @model-atom)))
-    new-value)
+(defn swapm! [new-value model-atom]
+  (swap! model-atom (fn [x] (assoc new-value :old-value @model-atom))))
 
 
-  (defn filter-todos [selected-filter]
-;;     (print "filter-todos" @model selected-filter)
+(defn todos-for-display [display todos]
+  (case display
+    :all (vals todos)
+    :completed (filter :done? (vals todos))
+    :active (filter (comp not :done?) (vals todos))))
+
+(defn set-active-display [display]
+  (-> @model
+      (assoc :display display)
+      (swapm! model)))
+
+
+(defn- get-new-id [todos]
+  (let [xform (comp (map second)
+                    (map :id)
+                    (map inc))]
+    (transduce xform max 0 todos)))
+
+
+(defn- new-todo [id name]
+  {:id id
+   :name name
+   :done? false
+   :editing? false})
+
+(defn add-todo [todo-name]
+  (let [new-id (get-new-id (:todos @model))]
     (-> @model
-        (assoc :context (if (nil? selected-filter) "list" "filtered"))
-        (assoc-in [:selected :filter-done] selected-filter)
-        (swapm! model)
-        ))
+        (assoc-in [:todos new-id] (new-todo new-id todo-name))
+        (swapm! model))))
 
 
-  (defn add-todo [todo-name]
-;;     (print "add-name" todo-name)
-    (let [new-id (inc (count (:todos @model)))]
-      (-> @model
-          (assoc-in [:todos (keyword (str new-id))] {:id new-id :name todo-name :done? false})
-          (swapm! model))))
+(defn delete-todo [todo-id]
+  (-> @model
+      (update-in [:todos] dissoc todo-id)
+      (swapm! model)))
 
-  (defn edit-todo [todo-id]
+
+(defn todo-edit-state [state]
+  (fn [id]
     (-> @model
-        (assoc :context "edit")
-        (assoc-in [:selected :todo] (get-in @model [:todos (keyword (str todo-id))]))
-        (swapm! model)
-        ))
+      (assoc-in [:todos id :editing?] state)
+      (swapm! model))))
+
+(def edit-todo (todo-edit-state true))
+(def stop-edit-todo (todo-edit-state false))
 
 
-  ;;edit helper
-  (defn save-todo []
-    (let [todo (get-in @model [:selected :todo])]
-      (-> @model
-          (assoc :context "list")
-          (assoc-in [:todos (keyword (str (:id todo)))] todo)
-          (assoc-in [:selected :todo] nil)
-          (swapm! model))
-      ))
-
-  ;;edit helper
-  (defn change-property [property value]
-    (let [todo (get-in @model [:selected :todo])]
-      (-> @model
-          (assoc-in [:selected :todo (keyword property)] value)
-          (swapm! model))
-      ))
-
-
-  (defn delete-todo [todo-id]
-    (-> @model
-        (update-in [:todos] (fn delete-todo [all-todos] (dissoc all-todos (keyword (str todo-id)))))
-        (swapm! model))
-    )
-
-
-  (defn undo []
-;;     (print "undo")
-    (-> @model
-        ((fn return-old-value [state]
-           (:old-value state)))
-        (swapm! model))
-    )
-
-  (defn on-change []
-    (print "a")
-    )
-
-
-  (defn toggle-todo [todo-id]
-    ((edit-todo todo-id)
-     (let [todo-done (get-in @model [:selected :todo :done?])]
-;;        (print "todo-done" todo-done)
-       (if (= todo-done true)
-         (change-property :done? false)
-         ;;else
-         (change-property :done? true)
-         ))
-     (save-todo))
-    )
-
-
-  (defn select-all []
-    (let [done select-all-var]
-      (print "done" done "select-all-var" select-all-var)
-      (if (= select-all-var true)
-        (set! select-all-var false)
-        ;;else
-        (set! select-all-var true))
-      (-> @model
-          (update :todos #(into {} (map (fn [[k v]] [k (assoc v :done? done)]) %)))
-          (swapm! model))
-      )
-    )
+(defn update-todo [id name]
+  (-> @model
+    (assoc-in [:todos id :name] name)
+    (swapm! model)))
 
 
 
+(defn undo []
+  (-> @model
+      :old-value
+      (swapm! model)))
+
+
+(defn toggle-todo [todo-id]
+  (-> @model
+    (update-in [:todos todo-id :done?] not)
+    (swapm! model)))
+
+
+(defn toggle-all [done]
+  (-> @model
+      (update :todos #(into {} (map (fn [[k v]] [k (assoc v :done? done)]) %)))
+      (swapm! model)))
